@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+</head>
+<body>
+
+<h2>LED Control</h2>
+ 
+ 
+
+
+
+<ontoggle="myFunction()">
+<label class="switch">
+  <input id = 1 onClick = "myFunction(id)" type="checkbox" unchecked>
+  <span class="slider round">  </span>
+  </label>
+ 
+
+<script>
+function myFunction(x) {
+var val = 0;
+  //alert("The ontoggle event occured");
+  if(document.getElementById(x).value=="OFF")
+              {
+               document.getElementById(x).value="ON";
+               //alert("3");
+               val = 1;
+               
+              }
+              else
+              {
+                document.getElementById(x).value="OFF";
+                val = 0;
+              }
+              
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById(x).innerHTML = this.responseText;
+    }
+  };
+  xhttp.open("GET", "https://api.thingspeak.com/update?api_key=XAZLIH7CDNDIE3LQ&field1=" + val, true);
+  xhttp.send();    
+  
+  let device  = await navigator.bluetooth.requestDevice({
+  	acceptAllDevice: true
+  //	filters: [
+   // 	{ namePrefix: 'DTAG3' }
+    //    ]
+      //  optionalServices: [ 0x ]
+  })
+  .then(device => { /*...*/})
+  .catch(error => {console.log(error);});
+  
+  let server = await device.gatt.connect();
+  
+  let service = await server.getPrimaryService(0x1800);
+  
+  let characteristic = await service.getCharacteristic(0x2A00);
+  
+  let value = await characteristic.readValue();
+  
+  let r = value.getUint8(1);
+  let g = value.getUint8(2);
+  let b = value.getUint8(3);
+  
+  alert(r);
+  alert(g);
+  alert(b);
+  
+  
+}
+
+
+</script>
+</body>
+</html> 
